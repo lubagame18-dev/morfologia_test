@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Система частей речи</title>
+<style>
+:root{
+  --violet:#6a3df0; --pink:#e84aa0; --yellow:#ffd23f; --ink:#26203a; --muted:#6c6680;
+  --bg:#f6f3ff; --card:#ffffff; --line:#e4defa; --ok:#22a06b; --bad:#e2483d; --okbg:#e6f7ef; --badbg:#fdecea;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 40px}
+.banner{background:linear-gradient(120deg,var(--violet),var(--pink));color:#fff;padding:22px 18px 26px;border-radius:0 0 22px 22px;margin:0 -16px 18px;position:relative;overflow:hidden}
+.banner:before,.banner:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.14)}
+.banner:before{width:140px;height:140px;right:-40px;top:-40px}
+.banner:after{width:80px;height:80px;right:60px;bottom:-35px;background:rgba(255,210,63,.35)}
+.tag{display:inline-block;background:var(--yellow);color:var(--ink);font-weight:700;font-size:13px;padding:3px 10px;border-radius:20px}
+h1{font-size:26px;margin:10px 0 4px;line-height:1.15}
+.sub{opacity:.92;font-size:14px}
+.card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 0 var(--line);margin-bottom:14px}
+label{display:block;font-weight:600;margin:10px 0 6px}
+input{width:100%;font:inherit;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fff}
+input:focus{outline:none;border-color:var(--violet)}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-family:inherit;font-weight:700;font-size:17px;color:#fff;background:linear-gradient(120deg,var(--violet),var(--pink));margin-top:16px;cursor:pointer}
+.btn.alt{background:#fff;color:var(--violet);border:2px solid var(--violet)}
+.btn:disabled{opacity:.45}
+.progress{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin:4px 0 14px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--pink));width:0;transition:width .3s}
+.qnum{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);margin-bottom:6px}
+.dot{width:30px;height:30px;border-radius:50%;background:var(--yellow);color:var(--ink);display:grid;place-items:center;font-weight:800}
+.qtext{font-size:18px;font-weight:600;margin:6px 0 12px}
+.example{background:#f2edff;border-left:4px solid var(--violet);padding:8px 12px;border-radius:8px;margin-bottom:12px;font-style:italic}
+.opt{display:block;width:100%;text-align:left;font:inherit;padding:13px 14px;margin:8px 0;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.opt.sel{border-color:var(--violet);background:#f2edff}
+.score{font-size:52px;font-weight:800;text-align:center;margin:4px 0;background:linear-gradient(120deg,var(--violet),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.center{text-align:center}
+.who{font-weight:700;font-size:18px}
+.time{color:var(--muted);font-size:14px}
+.rev{border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px}
+.rev.ok{background:var(--okbg)} .rev.bad{background:var(--badbg)}
+.rev b{display:block;margin-bottom:2px}
+.small{font-size:13px;color:var(--muted)}
+.hide{display:none}
+.status{margin:16px 0 4px;padding:12px;border-radius:12px;background:#f2edff;font-weight:600}
+.status.ok{background:var(--okbg);color:#14704a}
+.status.bad{background:var(--badbg);color:#a32a21}
+.note{font-size:14px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">
+    <span class="tag">Русский язык · 7 класс</span>
+    <h1>Система частей речи</h1>
+    <div class="sub">Проверь себя: 10 вопросов, примерно 5 минут. Результат сам придёт учителю.</div>
+  </div>
+
+  <!-- Начало -->
+  <section id="start" class="card">
+    <label for="name">Фамилия и имя</label>
+    <input id="name" autocomplete="name" placeholder="Например, Иванова Маша">
+    <label for="cls">Класс</label>
+    <input id="cls" placeholder="Например, 7А">
+    <button class="btn" id="go" disabled>Начать тест</button>
+    <p class="note">Выбирай один ответ. Вернуться к вопросу нельзя, поэтому не спеши.</p>
+  </section>
+
+  <!-- Вопрос -->
+  <section id="quiz" class="card hide">
+    <div class="progress"><i id="bar"></i></div>
+    <div class="qnum"><span class="dot" id="qn">1</span><span id="qof">из 10</span></div>
+    <div class="qtext" id="qt"></div>
+    <div class="example hide" id="qex"></div>
+    <div id="opts"></div>
+    <button class="btn" id="next" disabled>Дальше</button>
+  </section>
+
+  <!-- Результат -->
+  <section id="result" class="hide">
+    <div class="card center">
+      <div class="who" id="rWho"></div>
+      <div class="score" id="rScore"></div>
+      <div id="rMark"></div>
+      <div class="time" id="rTime"></div>
+      <div class="status" id="status">Отправляю результат учителю…</div>
+      <button class="btn hide" id="send">Отправить ещё раз</button>
+      <button class="btn alt hide" id="copy">Скопировать результат</button>
+      <p class="note" id="sent"></p>
+    </div>
+    <div class="card">
+      <b>Разбор ответов</b>
+      <div id="rList"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ===== НАСТРОЙКА: куда приходят результаты =====
+// Результаты отправляются письмом через бесплатный сервис FormSubmit.
+// После активации можно заменить почту на секретный код из письма FormSubmit.
+const TEACHER_EMAIL = "lubagame18@gmail.com";
+const TEST_NAME = "Система частей речи, 7 класс";
+// ================================================
+const Q = [
+  {t:"Что изучает морфология?",
+   o:["Слово как часть речи: его значение, признаки и формы","Звуки речи","Строение словосочетаний и предложений","Значения слов и их происхождение"], a:0},
+  {t:"Какие разделы языкознания объединяет грамматика?",
+   o:["Морфологию и синтаксис","Фонетику и орфографию","Лексику и словообразование","Орфографию и пунктуацию"], a:0},
+  {t:"Чем служебные части речи отличаются от самостоятельных?",
+   o:["Не называют предметов, признаков и действий и не бывают членами предложения","Всегда стоят в начале предложения","Отвечают только на вопрос «что делать?»","Изменяются по падежам"], a:0},
+  {t:"Какая часть речи НЕ относится к самостоятельным?",
+   o:["Частица","Наречие","Местоимение","Числительное"], a:0},
+  {t:"Какой глагол переходный?",
+   o:["Рисую картину","Иду в школу","Смеюсь над шуткой","Думаю о маме"], a:0},
+  {t:"Какой признак существительного постоянный?",
+   o:["Склонение","Падеж","Число","Все перечисленные"], a:0},
+  {t:"Какой признак глагола непостоянный?",
+   o:["Время","Вид","Спряжение","Возвратность"], a:0},
+  {t:"Определи разряд прилагательного.", ex:"<b>Лисий</b> хвост",
+   o:["Притяжательное","Качественное","Относительное","Порядковое"], a:0},
+  {t:"Какое числительное порядковое?",
+   o:["В две тысячи пятнадцатом году","Семь лет","До восьмидесяти пяти лет","Трое друзей"], a:0},
+  {t:"Сравни слово «бег» в двух предложениях. Что верно?", ex:"<b>Бег</b> укрепляет здоровье. Я люблю <b>бег</b>.",
+   o:["Часть речи одна, а члены предложения разные","Это разные части речи","Это одинаковые члены предложения","Это разные слова с разными корнями"], a:0}
+];
+
+// Перемешиваем варианты, чтобы у соседей порядок был разный
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const quiz = Q.map(q=>{const idx=shuffle(q.o.map((_,i)=>i));return {...q,o:idx.map(i=>q.o[i]),a:idx.indexOf(q.a)}});
+
+const $=id=>document.getElementById(id);
+let cur=0, pick=null, answers=[], who="", cls="", t0=0;
+
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+const nameIn=$("name"), clsIn=$("cls");
+nameIn.value=store("mt_name")||""; clsIn.value=store("mt_cls")||"";
+function check(){ $("go").disabled = !(nameIn.value.trim().length>2 && clsIn.value.trim()) }
+nameIn.oninput=clsIn.oninput=check; check();
+
+$("go").onclick=()=>{
+  who=nameIn.value.trim(); cls=clsIn.value.trim();
+  store("mt_name",who); store("mt_cls",cls);
+  t0=Date.now();
+  $("start").classList.add("hide"); $("quiz").classList.remove("hide");
+  show();
+};
+
+function show(){
+  const q=quiz[cur]; pick=null; $("next").disabled=true;
+  $("qn").textContent=cur+1; $("qof").textContent="из "+quiz.length;
+  $("bar").style.width=(cur/quiz.length*100)+"%";
+  $("qt").textContent=q.t;
+  if(q.ex){$("qex").innerHTML=q.ex;$("qex").classList.remove("hide")}else{$("qex").classList.add("hide")}
+  const box=$("opts"); box.innerHTML="";
+  q.o.forEach((txt,i)=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=txt;
+    b.onclick=()=>{pick=i;[...box.children].forEach(c=>c.classList.remove("sel"));b.classList.add("sel");$("next").disabled=false};
+    box.appendChild(b);
+  });
+  $("next").textContent = cur===quiz.length-1 ? "Завершить" : "Дальше";
+}
+
+$("next").onclick=()=>{
+  answers.push(pick); cur++;
+  if(cur<quiz.length) show(); else finish();
+};
+
+let resultText="", payload=null;
+function finish(){
+  $("quiz").classList.add("hide"); $("result").classList.remove("hide");
+  const right=answers.filter((p,i)=>p===quiz[i].a).length;
+  const wrong=answers.map((p,i)=>p===quiz[i].a?null:i+1).filter(Boolean);
+  const mins=Math.max(1,Math.round((Date.now()-t0)/60000));
+  const attempt=(+store("mt_attempt")||0)+1; store("mt_attempt",attempt);
+  const now=new Date();
+  const stamp=now.toLocaleDateString("ru-RU")+" "+now.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  const mark = right>=9?"5":right>=7?"4":right>=5?"3":"2";
+
+  $("rWho").textContent=who+", "+cls;
+  $("rScore").textContent=right+" из "+quiz.length;
+  $("rMark").textContent=right===quiz.length?"Отлично, всё верно!":(right>=7?"Хорошо! Посмотри ошибки ниже.":"Повтори таблицу признаков на рабочем листе.");
+  $("rTime").textContent=stamp+" · попытка "+attempt;
+
+  resultText="Тест «Система частей речи»\n"+who+", "+cls+"\nВерно: "+right+" из "+quiz.length+" (оценка "+mark+")\n"+
+    (wrong.length?"Ошибки в вопросах: "+wrong.join(", "):"Ошибок нет")+"\n"+stamp+", попытка "+attempt;
+
+  payload={
+    _subject:"Тест «"+TEST_NAME+"»: "+who+", "+cls+" – "+right+"/"+quiz.length,
+    _template:"table", _captcha:"false",
+    "Ученик":who, "Класс":cls, "Верно":right+" из "+quiz.length, "Отметка":mark,
+    "Ошибки в вопросах":wrong.length?wrong.join(", "):"нет",
+    "Дата и время":stamp, "Попытка":String(attempt)
+  };
+  sendResult();
+
+  const list=$("rList"); list.innerHTML="";
+  quiz.forEach((q,i)=>{
+    const ok=answers[i]===q.a; const d=document.createElement("div");
+    d.className="rev "+(ok?"ok":"bad");
+    const head=document.createElement("b"); head.textContent=(i+1)+". "+(ok?"Верно":"Ошибка");
+    const body=document.createElement("div");
+    body.innerHTML=q.t+(q.ex?" <i>"+q.ex+"</i>":"");
+    const ans=document.createElement("div"); ans.className="small";
+    ans.textContent=ok?"Твой ответ: "+q.o[q.a]:"Твой ответ: "+q.o[answers[i]]+" · Правильно: "+q.o[q.a];
+    d.append(head,body,ans); list.appendChild(d);
+  });
+}
+
+async function sendResult(){
+  const st=$("status"); st.className="status"; st.textContent="Отправляю результат учителю…";
+  $("send").classList.add("hide");
+  try{
+    const r=await fetch("https://formsubmit.co/ajax/"+TEACHER_EMAIL,{
+      method:"POST", headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify(payload)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok || j.success==="false" || j.success===false) throw new Error(j.message||"ошибка");
+    st.className="status ok"; st.textContent="Результат отправлен учителю ✓";
+    store("mt_pending","");
+  }catch(e){
+    st.className="status bad"; st.textContent="Не получилось отправить. Проверь интернет и нажми «Отправить ещё раз».";
+    $("send").classList.remove("hide"); $("copy").classList.remove("hide");
+    store("mt_pending",JSON.stringify(payload));
+  }
+}
+$("send").onclick=sendResult;
+$("copy").onclick=copy;
+function copy(){
+  const done=()=>$("sent").textContent="Результат скопирован. Вставь его в сообщение учителю.";
+  if(navigator.clipboard){navigator.clipboard.writeText(resultText).then(done,fallback)}else fallback();
+  function fallback(){const ta=document.createElement("textarea");ta.value=resultText;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){$("sent").textContent="Покажи этот экран учителю."}ta.remove()}
+}
+</script>
+</body>
+</html>
